@@ -5,7 +5,6 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 		<title>User Home</title>
 		<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
-		<link rel="icon" href="{{ url_for('static', filename='images/logo.png') }}" type="image/x-icon" />
 		<style>
 			body {
 				font-family: Arial, sans-serif;
@@ -66,13 +65,16 @@
 				<img src="{{ user.user_picture }}" alt="User Picture" width="100" height="100" />
 				<h2>{{ user.user_full_name }}</h2>
 				<p>Email: {{ user.user_email }}</p>
+				{% if user.github_link %}
+				<p>GitHub: <a href="{{ user.github_link }}" target="_blank">{{ user.github_link }}</a></p>
+				{% endif %}
 			</div>
-			<p>This is your home page.</p>
+			<p>Welcome to MDST Checkpoint Portal</p>
 			<div class="form-container">
-				<h3>Submit GitHub Link</h3>
+				<h3>Update GitHub Link</h3>
 				<form action="{{ url_for('submit_github_link') }}" method="POST">
 					<input type="url" name="github_link" placeholder="Enter GitHub link" required />
-					<button type="submit">Submit</button>
+					<button type="submit">Update</button>
 				</form>
 			</div>
 
@@ -89,7 +91,9 @@
 			</div>
 		</main>
 		<footer>
-			<a href="{{ url_for('logout') }}" style="color: white; text-decoration: none">Logout</a>
+			<a class="button-a" href="{{ url_for('logout') }}" style="color: white; text-decoration: none"
+				>Logout</a
+			>
 		</footer>
 	</body>
 </html>

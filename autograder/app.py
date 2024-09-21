@@ -14,9 +14,15 @@ supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 @app.route('/')
 def home():
+    """
+    If user session exist. Sign user in with homepage, else direct to login page.
+
+    Home route also checks and updates for first time users. If Users table cannot 
+    find entries when searched with google_id, a new entry will be created using 
+    the sessions google_id, name, and email.
+    """
     user = session.get('user')
     if not user: return redirect(url_for("login"))
-    check_user_in_database(user["id"], user["user_full_name"], user["user_email"])
     return render_template('index.html', user=user)
 
 @app.route('/login/')
@@ -52,6 +58,9 @@ def store_token():
         }
         print(user_info_dict)
         session["user"]=user_info_dict
+        
+        check_user_in_database(session["user"]["id"], session["user"]["user_full_name"], session["user"]["user_email"])
+        session["user"]["github_link"] = get_github_link_db(session["user"]["id"])
         return redirect(url_for('home'))
     else:
         return "Error: Access token not found", 400
@@ -64,7 +73,9 @@ def logout():
 @app.route('/submit_github_link/', methods=['POST'])
 def submit_github_link():
     github_link = request.form.get('github_link')
-    flash('GitHub link submitted successfully!', 'success')
+    update_github_link_db(session["user"]["id"], github_link)
+    session["user"]["github_link"] = github_link
+    session.modified = True
     return redirect(url_for('home'))
 
 @app.route('/upload_checkpoint_files/', methods=['POST'])
@@ -76,10 +87,9 @@ def upload_checkpoint_files():
 ######################################################
 # Helper functions
 ######################################################
-
 def check_user_in_database(uid: str, full_name: str, email):
     """
-    Check if user is in database. If not add user to database
+    Check if user is in database. If not add user to database in Users table. 
     """
     response = supabase.from_('Users').select('google_id').eq('google_id', uid).execute()
     
@@ -94,7 +104,13 @@ def check_user_in_database(uid: str, full_name: str, email):
     else:
         return "Error: Access token not found", 400
 
+def update_github_link_db(uid:str, github_link:str):
+    supabase.from_('Users').update({'github_link': github_link}).eq('google_id', uid).execute()
 
+def get_github_link_db(uid:str) -> str:
+    response = supabase.from_('Users').select('github_link').eq('google_id', uid).execute()
+    if response.data:
+        return response.data[0]['github_link']
     
 if __name__ == '__main__':
     app.run(debug=True, host="0.0.0.0", port=8080)
