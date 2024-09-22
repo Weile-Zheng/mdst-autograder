@@ -103,7 +103,6 @@ def upload_checkpoint_files():
                 elif file.filename == "checkpoint1.ipynb":
                     session["user"]["checkpoint1"] = "uploaded"
                 session.modified = True
-                return redirect(url_for('home')) 
             else:
                 flash('File upload failed when sending to database', 'error')
             os.remove(file_path)
