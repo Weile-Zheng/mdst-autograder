@@ -5,6 +5,7 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 		<title>User Home</title>
 		<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+		<link rel="icon" href="{{ url_for('static', filename='images/logo.png') }}" type="image/x-icon" />
 		<style>
 			body {
 				font-family: Arial, sans-serif;
@@ -21,14 +22,6 @@
 				padding: 2rem;
 				text-align: center;
 			}
-			footer {
-				color: white;
-				padding: 1rem;
-				text-align: center;
-				position: fixed;
-				width: 100%;
-				bottom: 0;
-			}
 			.user-info {
 				margin: 2rem auto;
 				padding: 1rem;
@@ -44,15 +37,17 @@
 			.user-info h2 {
 				margin: 0.5rem 0;
 			}
-
-			.gradient-text {
-				background: linear-gradient(
-					90deg,
-					#c0abfe,
-					#90f7df
-				); /* Adjust the gradient colors as needed */
-				-webkit-background-clip: text;
-				-webkit-text-fill-color: transparent;
+			.file-list {
+				list-style-type: none;
+				padding: 0;
+			}
+			.file-list li {
+				justify-content: space-between;
+				align-items: center;
+				margin-bottom: 5px;
+			}
+			.file-list button {
+				margin-left: 10px;
 			}
 		</style>
 	</head>
@@ -67,9 +62,15 @@
 				<p>Email: {{ user.user_email }}</p>
 				{% if user.github_link %}
 				<p>GitHub: <a href="{{ user.github_link }}" target="_blank">{{ user.github_link }}</a></p>
+				{% endif %} 
+				{% if user.checkpoint0 %}
+				<p>Checkpoint 0: {{ user.checkpoint0 }}</a>
+				{% endif %}
+				{% if user.checkpoint1 %}
+				<p>Checkpoint 1: {{ user.checkpoint1 }}</a>
 				{% endif %}
 			</div>
-			<p>Welcome to MDST Checkpoint Portal</p>
+			<p>MDST Checkpoint Portal</p>
 			<div class="form-container">
 				<h3>Update GitHub Link</h3>
 				<form action="{{ url_for('submit_github_link') }}" method="POST">
@@ -80,20 +81,74 @@
 
 			<div class="form-container">
 				<h3>Upload Tutorial Checkpoint Files</h3>
+				<p>
+					Please upload "checkpoint0.ipynb" and "checkpoint1.ipynb". All files with other name will
+					be automatically discarded. Only the most recent submission would be saved.
+				</p>
 				<form
+					id="uploadForm"
 					action="{{ url_for('upload_checkpoint_files') }}"
 					method="POST"
 					enctype="multipart/form-data"
 				>
-					<input type="file" name="checkpoint_files" multiple required />
+					<input type="file" id="fileInput" name="checkpoint_files" multiple required />
 					<button type="submit">Upload</button>
+					<ul id="fileList" class="file-list"></ul>
 				</form>
 			</div>
-		</main>
-		<footer>
 			<a class="button-a" href="{{ url_for('logout') }}" style="color: white; text-decoration: none"
 				>Logout</a
 			>
-		</footer>
+		</main>
+
+		<script>
+			let selectedFiles = [];
+
+			document.getElementById("fileInput").addEventListener("change", function (event) {
+				const fileList = document.getElementById("fileList");
+				const files = Array.from(event.target.files);
+
+				// Append new files to the selectedFiles array
+				files.forEach((file) => {
+					if (!selectedFiles.some((f) => f.name === file.name)) {
+						selectedFiles.push(file);
+					}
+				});
+
+				fileList.innerHTML = ""; // Clear the current list
+
+				selectedFiles.forEach((file, index) => {
+					const li = document.createElement("li");
+					li.textContent = file.name;
+					const removeButton = document.createElement("button");
+					removeButton.textContent = "X";
+					removeButton.dataset.fileName = file.name; // Attach file name as data attribute
+					removeButton.addEventListener("click", function () {
+						const fileName = this.dataset.fileName;
+						selectedFiles = selectedFiles.filter((f) => f.name !== fileName); // Remove the file from the array
+						updateFileInput(selectedFiles); // Update the file input
+						li.remove(); // Remove the list item
+					});
+					li.appendChild(removeButton);
+					fileList.appendChild(li);
+				});
+
+				updateFileInput(selectedFiles); // Update the file input with the new list
+			});
+
+			function updateFileInput(files) {
+				const dataTransfer = new DataTransfer();
+				files.forEach((file) => dataTransfer.items.add(file));
+				document.getElementById("fileInput").files = dataTransfer.files;
+			}
+
+			document.getElementById("uploadForm").addEventListener("submit", function (event) {
+				const fileInput = document.getElementById("fileInput");
+				if (!fileInput.files.length) {
+					event.preventDefault();
+					alert("Please select a file to upload.");
+				}
+			});
+		</script>
 	</body>
 </html>
