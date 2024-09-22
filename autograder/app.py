@@ -132,12 +132,28 @@ def check_user_in_database(uid: str, full_name: str, email) -> str:
         return "Error: Access token not found", 400
 
 def update_github_link_db(uid:str, github_link:str) -> None:
+    """
+    Given uid(google id), update github link for the user on Users table
+    """
     supabase.from_('Users').update({'github_link': github_link}).eq('google_id', uid).execute()
 
+
 def get_github_link_db(uid:str) -> str:
+    """
+    Get github link for te user on Users table
+
+        @params
+            uid: google_id
+    """
     response = supabase.from_('Users').select('github_link').eq('google_id', uid).execute()
     if response.data:
         return response.data[0]['github_link']
+
+def update_checkpoint_submission_db(email: str, checkpoint_file_name: str):
+    pass
+
+def get_checkpoint_submission_db(email:str):
+    pass 
 
 def check_file_validity (file: FileStorage) -> bool:
     """
