@@ -3,22 +3,20 @@ import requests
 from flask import Flask, redirect, url_for, request, session, render_template, flash
 from werkzeug.datastructures import FileStorage
 from supabase import create_client
+
+# Timestamp with timezone
+import pytz  
+from datetime import datetime
+
+## Config
 from config import Config
+
 
 
 app = Flask(__name__)
 app.config.from_object(Config)
 
 supabase = create_client(app.config["SUPABASE_URL"], app.config["SUPABASE_KEY"])
-
-
-UPLOAD_FOLDER = 'uploads'
-MAX_FILE_SIZE = 500 * 1024 # 500 KB for checkpoint files
-ALLOWED_FILENAMES = {'checkpoint0.ipynb', 'checkpoint1.ipynb'}
-
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-app.config['MAX_FILE_SIZE'] = MAX_FILE_SIZE
-app.config['ALLOWED_FILENAMES'] = ALLOWED_FILENAMES
 
 @app.route('/')
 def home():
@@ -35,6 +33,9 @@ def home():
 
 @app.route('/login/')
 def login():
+    """
+    Login page. If authenticated, redirect to home, else render login template
+    """
     user = session.get('user')
     if user: return redirect(url_for("home"))
     return render_template('login.html')
@@ -44,7 +45,6 @@ def login_auth():
     callback_url = url_for('callback', _external=True) 
     response = supabase.auth.sign_in_with_oauth({"provider": 'google', 
     "options": {"redirect_to": callback_url}})
-    
     return redirect(response.url)
 
 @app.route('/callback/')
@@ -69,6 +69,14 @@ def store_token():
         
         check_user_in_database(session["user"]["id"], session["user"]["user_full_name"], session["user"]["user_email"])
         session["user"]["github_link"] = get_github_link_db(session["user"]["id"])
+        checkpoint_submission = get_checkpoint_submission_db(session["user"]["user_email"])
+        if checkpoint_submission["checkpoint0_filename"] is not None:
+            session["user"]["checkpoint0_filename"] = checkpoint_submission["checkpoint0_filename"] 
+            session["user"]["checkpoint0_last_submission_time"] = checkpoint_submission["checkpoint0_last_submission_time"] 
+        if checkpoint_submission["checkpoint1_filename"] is not None:
+            session["user"]["checkpoint1_filename"] = checkpoint_submission["checkpoint1_filename"] 
+            session["user"]["checkpoint1_last_submission_time"] = checkpoint_submission["checkpoint1_last_submission_time"] 
+
         return redirect(url_for('home'))
     else:
         return "Error: Access token not found", 400
@@ -95,13 +103,16 @@ def upload_checkpoint_files():
             file_path = os.path.join(app.config['UPLOAD_FOLDER'], new_filename) 
             file.save(file_path)
             response = upload_checkpoint_to_supabase(new_filename, file_path)
-            print(response)
             if response.status_code == 200: 
                 flash('Files uploaded successfully!', 'success')
                 if file.filename == "checkpoint0.ipynb":
-                    session["user"]["checkpoint0"] = "uploaded"
+                    time = update_checkpoint_submission_db(session["user"]["user_email"], new_filename, 1)
+                    session["user"]["checkpoint0_filename"] = new_filename
+                    session["user"]["checkpoint0_last_submission_time"] = time 
                 elif file.filename == "checkpoint1.ipynb":
-                    session["user"]["checkpoint1"] = "uploaded"
+                    time = update_checkpoint_submission_db(session["user"]["user_email"], new_filename, 0)
+                    session["user"]["checkpoint1_filename"] = new_filename
+                    session["user"]["checkpoint1_last_submission_time"] = time 
                 session.modified = True
             else:
                 flash('File upload failed when sending to database', 'error')
@@ -122,11 +133,24 @@ def check_user_in_database(uid: str, full_name: str, email) -> str:
     response = supabase.from_('Users').select('google_id').eq('google_id', uid).execute()
     
     if not response.data:
+        
+        # Make an empty entry in tutorial submission table:
+        # This empty entry would simplify our job when updating scores,
+        # as we do note need to check for existance of an entry to update in tutorial
+        # submission, it is all taken care of during user first time log in. 
+        supabase.from_('Tutorial_Submission').insert({
+            'email': email
+        }).execute()
+        print("Submission entry created in table: Submission")
+
+        # Make an entry in users table
         supabase.from_('Users').insert({
                 'google_id': uid,
                 'full_name': full_name,
                 'email': email,
             }).execute()
+        print("User enry created in table: Users")
+
     else:
         return "Error: Access token not found", 400
 
@@ -148,11 +172,30 @@ def get_github_link_db(uid:str) -> str:
     if response.data:
         return response.data[0]['github_link']
 
-def update_checkpoint_submission_db(email: str, checkpoint_file_name: str):
+def run_checkpoint_tests(filepath:str):
+    """
+    Run checkpoint completion, compilation, correctness (if applicable) tests on the file
+
+    Note this function expects a valid input and does not do additial checkings 
+    on the file type, size etc. 
+    """
     pass
 
+def update_checkpoint_submission_db(email: str, checkpoint_file_name: str, isCheckpoint0: bool) -> str:
+    time_stamp = datetime.now(pytz.timezone('US/Eastern')).isoformat()
+    if isCheckpoint0:
+        supabase.from_('Tutorial_Submission').update({'checkpoint0_filename': checkpoint_file_name,
+                                                     'checkpoint0_last_submission_time': time_stamp}).eq('email', email).execute()
+    else:
+        supabase.from_('Tutorial_Submission').update({'checkpoint1_filename': checkpoint_file_name, 
+                                                    'checkpoint1_last_submission_time': time_stamp}).eq('email', email).execute()
+    return time_stamp
+
 def get_checkpoint_submission_db(email:str):
-    pass 
+    response = supabase.from_(
+        'Tutorial_Submission').select('checkpoint0_filename, checkpoint0_last_submission_time,checkpoint1_filename, checkpoint1_last_submission_time').eq('email', email).execute()
+    if response.data:
+        return response.data[0]
 
 def check_file_validity (file: FileStorage) -> bool:
     """
@@ -183,6 +226,10 @@ def strip_uniquename_from_email(email: str) -> bool:
     Ex: weilez@umich.edu -> weilez
     """
     return email.split('@')[0]
+
+
+
+
 
 if __name__ == '__main__':
     app.run(debug=True, host="0.0.0.0", port=8080)

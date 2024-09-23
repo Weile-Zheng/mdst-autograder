@@ -10,3 +10,4 @@ class Config:
     UPLOAD_FOLDER = 'uploads'
     MAX_FILE_SIZE = 500 * 1024  # 500 KB for checkpoint files
     ALLOWED_FILENAMES = {'checkpoint0.ipynb', 'checkpoint1.ipynb'}
+    TIMEZONE = 'US/Eastern'
