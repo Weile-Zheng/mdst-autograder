@@ -2,6 +2,7 @@
 import os, requests
 import pytz  
 from datetime import datetime
+from typing import Dict
 
 #----Flask
 from flask import Flask, redirect, url_for, request, session, render_template, flash
@@ -130,16 +131,30 @@ def upload_checkpoint_files():
             new_filename = strip_uniquename_from_email(session["user"]["user_email"]) + "_" + file.filename
             file_path = os.path.join(app.config['UPLOAD_FOLDER'], new_filename) 
             file.save(file_path)
-            run_checkpoint_tests(file_path)
+            score = run_checkpoint_tests(file_path)
             response = upload_checkpoint_to_supabase(new_filename, file_path)
             if response.status_code == 200: 
                 flash('Files uploaded successfully!', 'success')
+
                 if file.filename == "checkpoint0.ipynb":
-                    time = update_checkpoint_submission_db(session["user"]["user_email"], new_filename, 1)
+                    time = update_checkpoint_submission_db(
+                        session["user"]["user_email"], 
+                        new_filename, 
+                        1,
+                        score["raw_score"],
+                        score["percent_score"])
+                    
                     session["user"]["checkpoint0_filename"] = new_filename
                     session["user"]["checkpoint0_last_submission_time"] = time 
+
                 elif file.filename == "checkpoint1.ipynb":
-                    time = update_checkpoint_submission_db(session["user"]["user_email"], new_filename, 0)
+                    time = update_checkpoint_submission_db(
+                            session["user"]["user_email"], 
+                            new_filename, 
+                            0,
+                            score["raw_score"],
+                            score["percent_score"])
+                    
                     session["user"]["checkpoint1_filename"] = new_filename
                     session["user"]["checkpoint1_last_submission_time"] = time
                 session.modified = True
@@ -201,27 +216,44 @@ def get_github_link_db(uid:str) -> str:
     if response.data:
         return response.data[0]['github_link']
 
-def run_checkpoint_tests(filepath: str):
+def run_checkpoint_tests(filepath: str) -> Dict[str, int]:
     """
     Run checkpoint completion, compilation, correctness (if applicable) tests on the file
 
     Note this function expects a valid input and does not do additial checkings 
     on the file type, size etc. 
+
+    Returns a dict on computed "raw_score" and "percent_score"
     """
     grader_instance = grader(filepath, app.config["CHECKPOINT_QUESTION_TAG"])
     grader_instance.check_cells_have_code()
     grader_instance.print_results()
     grader_instance.print_grade()
+    return {"raw_score": grader_instance.get_final_grade_raw(), 
+            "percent_score": grader_instance.get_final_grade_percentage()}
+    
 
 
-def update_checkpoint_submission_db(email: str, checkpoint_file_name: str, isCheckpoint0: bool) -> str:
+def update_checkpoint_submission_db(email: str, 
+        checkpoint_file_name: str, isCheckpoint0: bool, raw_score: int, percent_score: float) -> str:
+    """
+    Update the Tutorials Submission table. 
+    """
     time_stamp = datetime.now(pytz.timezone('US/Eastern')).isoformat()
     if isCheckpoint0:
-        supabase.from_('Tutorial_Submission').update({'checkpoint0_filename': checkpoint_file_name,
-        'checkpoint0_last_submission_time': time_stamp}).eq('email', email).execute()
+        supabase.from_('Tutorial_Submission').update({
+             'checkpoint0_filename': checkpoint_file_name,
+             'checkpoint0_last_submission_time': time_stamp,
+             'checkpoint0_raw': raw_score,
+             'checkpoint0_percent':percent_score
+            }).eq('email', email).execute()
     else:
-        supabase.from_('Tutorial_Submission').update({'checkpoint1_filename': checkpoint_file_name, 
-        'checkpoint1_last_submission_time': time_stamp}).eq('email', email).execute()
+        supabase.from_('Tutorial_Submission').update({
+            'checkpoint1_filename': checkpoint_file_name, 
+            'checkpoint1_last_submission_time': time_stamp,
+            'checkpoint1_raw': raw_score,
+            'checkpoint1_percent': percent_score
+            }).eq('email', email).execute()
     return time_stamp
 
 def get_checkpoint_submission_db(email: str) -> list[str]:
@@ -235,7 +267,7 @@ def get_checkpoint_submission_db(email: str) -> list[str]:
 
 def check_file_validity (file: FileStorage) -> bool:
     """
-    Checks if file passes both extension and 
+    Checks if file passes both extension and max file size test. 
     """
     if file.content_length > app.config['MAX_FILE_SIZE']:
         return False

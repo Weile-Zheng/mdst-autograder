@@ -69,7 +69,7 @@ class grader:
             results.append((cell, has_code))
         self.result = results
 
-    def get_final_grade_percentage(self) -> None: 
+    def get_final_grade_percentage(self) -> float: 
         if self.total_cells_checked == 0:
             return 0.0
         return round((self.cells_containing_code / self.total_cells_checked) * 100, 2)    
