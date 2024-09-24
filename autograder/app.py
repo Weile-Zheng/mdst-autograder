@@ -1,17 +1,19 @@
-import os
-import requests
+#----Utils
+import os, requests
+
+#----Flask
 from flask import Flask, redirect, url_for, request, session, render_template, flash
 from werkzeug.datastructures import FileStorage
+
+#----Supabase
 from supabase import create_client
 
-# Timestamp with timezone
+#----Timestamp and timezone
 import pytz  
 from datetime import datetime
 
-## Config
+#----Config
 from config import Config
-
-
 
 app = Flask(__name__)
 app.config.from_object(Config)
@@ -42,6 +44,9 @@ def login():
 
 @app.route('/login/auth/')
 def login_auth():
+    """
+    Oauth intermediate route
+    """
     callback_url = url_for('callback', _external=True) 
     response = supabase.auth.sign_in_with_oauth({"provider": 'google', 
     "options": {"redirect_to": callback_url}})
@@ -49,11 +54,25 @@ def login_auth():
 
 @app.route('/callback/')
 def callback():
+    """
+    Render template to immediately fetch tokens, redirect to store_token route which 
+    redirect to home.
+
+    This is a workaround to allow flask, a backend application to retrieve url fragments,
+    which holds the authentication token returned from Google. 
+
+    This page will not be shown to user, after login, client side will be rerouted 
+    to final destination home. 
+    """
     return render_template('callback.html')
 
 @app.route('/store_token/', methods=['POST'])
 def store_token():
+    """
+    Store authentication token and create/retrive User session data. 
+    """
     access_token = request.form.get('access_token')
+
 
     if access_token:
         session['access_token'] = access_token
@@ -76,18 +95,23 @@ def store_token():
         if checkpoint_submission["checkpoint1_filename"] is not None:
             session["user"]["checkpoint1_filename"] = checkpoint_submission["checkpoint1_filename"] 
             session["user"]["checkpoint1_last_submission_time"] = checkpoint_submission["checkpoint1_last_submission_time"] 
-
         return redirect(url_for('home'))
     else:
         return "Error: Access token not found", 400
 
 @app.route('/logout/')
 def logout():
+    """
+    Clear session and log user out. 
+    """
     session.clear()
     return redirect(url_for('login'))
 
 @app.route('/submit_github_link/', methods=['POST'])
 def submit_github_link():
+    """
+    Route for updating github link to database. Redirect to home for rerender. 
+    """
     github_link = request.form.get('github_link')
     update_github_link_db(session["user"]["id"], github_link)
     session["user"]["github_link"] = github_link
@@ -96,6 +120,9 @@ def submit_github_link():
 
 @app.route('/upload_checkpoint_files/', methods=['POST'])
 def upload_checkpoint_files():
+    """
+    Route for updating checkpoint files to database. Redirect to home for rerender
+    """
     files = request.files.getlist('checkpoint_files')
     for file in files:
         if check_file_validity(file):
@@ -154,7 +181,7 @@ def check_user_in_database(uid: str, full_name: str, email) -> str:
     else:
         return "Error: Access token not found", 400
 
-def update_github_link_db(uid:str, github_link:str) -> None:
+def update_github_link_db(uid: str, github_link: str) -> None:
     """
     Given uid(google id), update github link for the user on Users table
     """
@@ -185,13 +212,16 @@ def update_checkpoint_submission_db(email: str, checkpoint_file_name: str, isChe
     time_stamp = datetime.now(pytz.timezone('US/Eastern')).isoformat()
     if isCheckpoint0:
         supabase.from_('Tutorial_Submission').update({'checkpoint0_filename': checkpoint_file_name,
-                                                     'checkpoint0_last_submission_time': time_stamp}).eq('email', email).execute()
+        'checkpoint0_last_submission_time': time_stamp}).eq('email', email).execute()
     else:
         supabase.from_('Tutorial_Submission').update({'checkpoint1_filename': checkpoint_file_name, 
-                                                    'checkpoint1_last_submission_time': time_stamp}).eq('email', email).execute()
+        'checkpoint1_last_submission_time': time_stamp}).eq('email', email).execute()
     return time_stamp
 
-def get_checkpoint_submission_db(email:str):
+def get_checkpoint_submission_db(email: str) -> list[str]:
+    """
+
+    """
     response = supabase.from_(
         'Tutorial_Submission').select('checkpoint0_filename, checkpoint0_last_submission_time,checkpoint1_filename, checkpoint1_last_submission_time').eq('email', email).execute()
     if response.data:
@@ -219,16 +249,12 @@ def upload_checkpoint_to_supabase(filename: str, filepath: str) -> requests.Resp
     return supabase.storage.from_('checkpoints').upload(filename, filepath, {'upsert':'true'})
 
 def strip_uniquename_from_email(email: str) -> bool:
-
     """
     Strips the unique name from an email address given an email.
 
     Ex: weilez@umich.edu -> weilez
     """
     return email.split('@')[0]
-
-
-
 
 
 if __name__ == '__main__':

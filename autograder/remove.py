@@ -6,17 +6,16 @@ import pytz
 from datetime import datetime
 
 
-
-time_stamp = datetime.now(pytz.timezone('US/Eastern')).isoformat()
-
-# Initialize Supabase client
 url: str = os.getenv("SUPABASE_URL")
 key: str = os.getenv("SUPABASE_KEY")
 supabase: Client = create_client(url, key)
 
-# Delete everything in the table
-response = supabase.from_('Users').delete().neq('email', '').execute()
-response = supabase.from_('Tutorial_Submission').delete().neq('email','').execute()
 
-# Check the response
-print(response)
+"""
+Delete all entries from Users and Tutorial_Submission table. For testing purposes only. 
+"""
+response0 = supabase.from_('Users').delete().neq('email', '').execute()
+response1 = supabase.from_('Tutorial_Submission').delete().neq('email','').execute()
+
+print(response0)
+print(response1)
