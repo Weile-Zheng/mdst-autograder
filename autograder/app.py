@@ -1,5 +1,7 @@
 #----Utils
 import os, requests
+import pytz  
+from datetime import datetime
 
 #----Flask
 from flask import Flask, redirect, url_for, request, session, render_template, flash
@@ -8,12 +10,11 @@ from werkzeug.datastructures import FileStorage
 #----Supabase
 from supabase import create_client
 
-#----Timestamp and timezone
-import pytz  
-from datetime import datetime
-
 #----Config
 from config import Config
+
+#----Grader
+from grader import grader
 
 app = Flask(__name__)
 app.config.from_object(Config)
@@ -129,6 +130,7 @@ def upload_checkpoint_files():
             new_filename = strip_uniquename_from_email(session["user"]["user_email"]) + "_" + file.filename
             file_path = os.path.join(app.config['UPLOAD_FOLDER'], new_filename) 
             file.save(file_path)
+            run_checkpoint_tests(file_path)
             response = upload_checkpoint_to_supabase(new_filename, file_path)
             if response.status_code == 200: 
                 flash('Files uploaded successfully!', 'success')
@@ -139,7 +141,7 @@ def upload_checkpoint_files():
                 elif file.filename == "checkpoint1.ipynb":
                     time = update_checkpoint_submission_db(session["user"]["user_email"], new_filename, 0)
                     session["user"]["checkpoint1_filename"] = new_filename
-                    session["user"]["checkpoint1_last_submission_time"] = time 
+                    session["user"]["checkpoint1_last_submission_time"] = time
                 session.modified = True
             else:
                 flash('File upload failed when sending to database', 'error')
@@ -199,14 +201,18 @@ def get_github_link_db(uid:str) -> str:
     if response.data:
         return response.data[0]['github_link']
 
-def run_checkpoint_tests(filepath:str):
+def run_checkpoint_tests(filepath: str):
     """
     Run checkpoint completion, compilation, correctness (if applicable) tests on the file
 
     Note this function expects a valid input and does not do additial checkings 
     on the file type, size etc. 
     """
-    pass
+    grader_instance = grader(filepath, app.config["CHECKPOINT_QUESTION_TAG"])
+    grader_instance.check_cells_have_code()
+    grader_instance.print_results()
+    grader_instance.print_grade()
+
 
 def update_checkpoint_submission_db(email: str, checkpoint_file_name: str, isCheckpoint0: bool) -> str:
     time_stamp = datetime.now(pytz.timezone('US/Eastern')).isoformat()
