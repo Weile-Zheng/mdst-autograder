@@ -1,20 +1,16 @@
-#----Utils
+#----Utils----
 import os, requests
 import pytz  
 from datetime import datetime
 from typing import Dict
+from util import check_file_validity, uniquename_from_email
 
-#----Flask
+#----Flask----
 from flask import Flask, redirect, url_for, request, session, render_template, flash
 from werkzeug.datastructures import FileStorage
 
-#----Supabase
 from supabase import create_client
-
-#----Config
 from config import Config
-
-#----Grader
 from grader import grader
 
 app = Flask(__name__)
@@ -127,8 +123,8 @@ def upload_checkpoint_files():
     """
     files = request.files.getlist('checkpoint_files')
     for file in files:
-        if check_file_validity(file):
-            new_filename = strip_uniquename_from_email(session["user"]["user_email"]) + "_" + file.filename
+        if check_file_validity(file, app.config["MAX_FILE_SIZE"], app.config["ALLOWED_FILENAMES"]):
+            new_filename = uniquename_from_email(session["user"]["user_email"]) + "_" + file.filename
             file_path = os.path.join(app.config['UPLOAD_FOLDER'], new_filename) 
             file.save(file_path)
             score = run_checkpoint_tests(file_path)
@@ -265,16 +261,6 @@ def get_checkpoint_submission_db(email: str) -> list[str]:
     if response.data:
         return response.data[0]
 
-def check_file_validity (file: FileStorage) -> bool:
-    """
-    Checks if file passes both extension and max file size test. 
-    """
-    if file.content_length > app.config['MAX_FILE_SIZE']:
-        return False
-    if not file.filename in app.config['ALLOWED_FILENAMES']:
-        return False
-    return True
-
 def upload_checkpoint_to_supabase(filename: str, filepath: str) -> requests.Response: 
     """
     Upload a checkpoint file to supabase bucket: "checkpoints".
@@ -285,14 +271,6 @@ def upload_checkpoint_to_supabase(filename: str, filepath: str) -> requests.Resp
     on the file type, size etc. 
     """
     return supabase.storage.from_('checkpoints').upload(filename, filepath, {'upsert':'true'})
-
-def strip_uniquename_from_email(email: str) -> bool:
-    """
-    Strips the unique name from an email address given an email.
-
-    Ex: weilez@umich.edu -> weilez
-    """
-    return email.split('@')[0]
 
 
 if __name__ == '__main__':
