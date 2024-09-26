@@ -11,6 +11,7 @@ setup(
         'werkzeug',
         'pytest',
         'supabase',
-        'flask'
+        'flask',
+        'jinja2'
     ],
 )
