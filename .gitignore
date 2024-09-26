@@ -2,8 +2,6 @@
 /env
 .env
 /myenv
-grader/
-grader.py
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
@@ -90,3 +88,4 @@ docs/_build/man
 docs/_build/texinfo
 docs/_build/epub
 docs/_build/epub3
+.vercel
