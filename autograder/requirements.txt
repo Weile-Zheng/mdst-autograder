@@ -4,7 +4,6 @@ aiosignal==1.3.1
 annotated-types==0.7.0
 anyio==4.5.0
 attrs==24.2.0
--e git+ssh://git@github.com/Weile-Zheng/mdst-autograder.git@48a830984083951a22b65f41900117273511f78a#egg=autograder
 blinker==1.8.2
 certifi==2024.8.30
 charset-normalizer==3.3.2
