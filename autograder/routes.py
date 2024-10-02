@@ -1,7 +1,7 @@
 #----Utils----
 import os
-from util import *
-from db import *
+from autograder.util import *
+from autograder.db import *
 
 #----Flask----
 from autograder import supabase_client

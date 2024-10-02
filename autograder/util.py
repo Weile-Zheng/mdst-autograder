@@ -1,7 +1,7 @@
 
 import autograder
 from typing import Dict
-from grader import grader
+from autograder.grader import grader
 from werkzeug.datastructures import FileStorage
 
 def check_file_validity (file: FileStorage, maxFileSize: int, allowedFileNames: set) -> bool:
