@@ -1,10 +1,5 @@
 import os
 from supabase import create_client, Client
-from routes import check_user_in_database, update_github_link_db, get_github_link_db
-
-import pytz  
-from datetime import datetime
-
 
 url: str = os.getenv("SUPABASE_URL")
 key: str = os.getenv("SUPABASE_KEY")

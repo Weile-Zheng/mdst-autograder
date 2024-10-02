@@ -4,7 +4,7 @@ from util import *
 from db import *
 
 #----Flask----
-import autograder
+from autograder import supabase_client
 from flask import redirect, url_for, request, session, render_template, flash
 
 @autograder.app.route('/')
@@ -35,7 +35,7 @@ def login_auth():
     Oauth intermediate route
     """
     callback_url = url_for('callback', _external=True) 
-    response = supabase.auth.sign_in_with_oauth({"provider": 'google', 
+    response = supabase_client.auth.sign_in_with_oauth({"provider": 'google', 
     "options": {"redirect_to": callback_url}})
     return redirect(response.url)
 
@@ -63,7 +63,7 @@ def store_token():
 
     if access_token:
         session['access_token'] = access_token
-        user_info = supabase.auth.get_user(access_token).user
+        user_info = supabase_client.auth.get_user(access_token).user
         user_info_dict = {
             'id':user_info.id,
             'user_full_name': user_info.user_metadata['full_name'],

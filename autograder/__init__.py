@@ -6,6 +6,6 @@ from config import Config
 app = Flask(__name__)
 app.config.from_object(Config)
 
-supabase = create_client(app.config["SUPABASE_URL"], app.config["SUPABASE_KEY"])
+supabase_client = create_client(app.config["SUPABASE_URL"], app.config["SUPABASE_KEY"])
 
-import routes
+import routes # Register the routes

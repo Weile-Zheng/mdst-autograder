@@ -26,3 +26,7 @@ def test_uniquename_from_email():
     assert uniquename_from_email("weilez@umich.edu") == "weilez"
     assert uniquename_from_email("bigpanda@example.com") == "bigpanda"
     assert uniquename_from_email("amiralid@domain.com") == "amiralid"
+
+def test_grader_correctness():
+    # Test the correctness of autograder. 
+    pass
