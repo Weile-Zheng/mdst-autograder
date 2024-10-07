@@ -94,3 +94,11 @@ def upload_checkpoint_to_supabase(filename: str, filepath: str) -> requests.Resp
     on the file type, size etc. 
     """
     return supabase_client.storage.from_('checkpoints').upload(filename, filepath, {'upsert':'true'})
+
+def get_checkpoint_file_url(filename: str, bucketname: str) -> str:
+    """
+    Get the url of the file in the checkpoint bucket
+    """
+    # 60 days in seconds
+    expiration_time = 60 * 24 * 60 * 60
+    return supabase_client.storage.from_('checkpoints').create_signed_url(filename, expiration_time)['signedURL']

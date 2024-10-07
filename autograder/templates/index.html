@@ -64,14 +64,17 @@
 				<p>GitHub: <a href="{{ user.github_link }}" target="_blank">{{ user.github_link }}</a></p>
 				{% endif %} {% if user.checkpoint0_filename %}
 				<p>
-					Checkpoint 0: {{ user.checkpoint0_filename }} Upload Time:
-					{{user.checkpoint0_last_submission_time}}
+					Checkpoint 0:
+					<a href="{{user.checkpoint0_url}}" download>{{ user.checkpoint0_filename }} </a
+					>&nbsp;{{user.checkpoint0_last_submission_time}}
 				</p>
 				{% endif %} {% if user.checkpoint1_filename %}
 				<p>
-					Checkpoint 1: {{ user.checkpoint1_filename}} Upload Time:
-					{{user.checkpoint1_last_submission_time}}
+					Checkpoint 1:
+					<a href="{{user.checkpoint1_url}}" download>{{ user.checkpoint1_filename}}</a
+					>&nbsp;{{user.checkpoint1_last_submission_time}}
 				</p>
+
 				{% endif %}
 			</div>
 			<p>MDST Checkpoint Portal</p>

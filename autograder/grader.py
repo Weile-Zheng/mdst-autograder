@@ -90,7 +90,7 @@ class grader:
         for cell, has_code in self.result:
             first_line = cell.source.splitlines()[0] if cell.source.splitlines() else ""
             print(f"Cell with comment '{first_line}' has code: {has_code}")
-
+    
     def print_grade(self) -> None:
         """
         Print the grade base on the number of cells containing code divided by the total cells checked.
@@ -109,7 +109,7 @@ class grader:
 if __name__ == "__main__":
     notebook_path = 'checkpoint0.ipynb'
     question_start_with = "# Question"
-
+    
     grader_instance = grader(notebook_path, question_start_with)
     grader_instance.check_cells_have_code()
     grader_instance.print_results()

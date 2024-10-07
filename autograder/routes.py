@@ -76,12 +76,16 @@ def store_token():
         check_user_in_database(session["user"]["id"], session["user"]["user_full_name"], session["user"]["user_email"])
         session["user"]["github_link"] = get_github_link_db(session["user"]["id"])
         checkpoint_submission = get_checkpoint_submission_db(session["user"]["user_email"])
+        uniquename = uniquename_from_email(session["user"]["user_email"])
         if checkpoint_submission["checkpoint0_filename"] is not None:
             session["user"]["checkpoint0_filename"] = checkpoint_submission["checkpoint0_filename"] 
             session["user"]["checkpoint0_last_submission_time"] = checkpoint_submission["checkpoint0_last_submission_time"] 
+            session["user"]["checkpoint0_url"] = get_checkpoint_file_url(f"{uniquename}_checkpoint0.ipynb", "checkpoints")
         if checkpoint_submission["checkpoint1_filename"] is not None:
             session["user"]["checkpoint1_filename"] = checkpoint_submission["checkpoint1_filename"] 
             session["user"]["checkpoint1_last_submission_time"] = checkpoint_submission["checkpoint1_last_submission_time"] 
+            session["user"]["checkpoint1_url"] = get_checkpoint_file_url(f"{uniquename}_checkpoint1.ipynb", "checkpoints")
+            print(f"checkpoint1: url {session["user"]["checkpoint1_url"]}")
         return redirect(url_for('home'))
     else:
         return "Error: Access token not found", 400
@@ -131,6 +135,7 @@ def upload_checkpoint_files():
                     
                     session["user"]["checkpoint0_filename"] = new_filename
                     session["user"]["checkpoint0_last_submission_time"] = time 
+                    session["user"]["checkpoint0_url"] = get_checkpoint_file_url(new_filename, "checkpoints")
 
                 elif file.filename == "checkpoint1.ipynb":
                     time = update_checkpoint_submission_db(
@@ -142,6 +147,8 @@ def upload_checkpoint_files():
                     
                     session["user"]["checkpoint1_filename"] = new_filename
                     session["user"]["checkpoint1_last_submission_time"] = time
+                    session["user"]["checkpoint1_url"] = get_checkpoint_file_url(new_filename, "checkpoints")
+
                 session.modified = True
             else:
                 flash('File upload failed when sending to database', 'error')
