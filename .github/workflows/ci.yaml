@@ -29,3 +29,7 @@ jobs:
             - name: Run tests
               run: |
                   pytest -v tests
+              env:
+                  SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+                  SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+                  SECRET_KEY: ${{ secrets.SECRET_KEY }}
