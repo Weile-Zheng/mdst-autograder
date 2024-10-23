@@ -65,14 +65,18 @@
 				{% endif %} {% if user.checkpoint0_filename %}
 				<p>
 					Checkpoint 0:
-					<a href="{{user.checkpoint0_url}}" download>{{ user.checkpoint0_filename }} </a
-					>&nbsp;{{user.checkpoint0_last_submission_time}}
+					<a href="{{ user.checkpoint0_url }}" download="{{ user.checkpoint0_filename }}"
+						>{{ user.checkpoint0_filename }}</a
+					>
+					&nbsp;{{ user.checkpoint0_last_submission_time }}
 				</p>
 				{% endif %} {% if user.checkpoint1_filename %}
 				<p>
 					Checkpoint 1:
-					<a href="{{user.checkpoint1_url}}" download>{{ user.checkpoint1_filename}}</a
-					>&nbsp;{{user.checkpoint1_last_submission_time}}
+					<a href="{{ user.checkpoint1_url }}" download="{{ user.checkpoint1_filename }}"
+						>{{ user.checkpoint1_filename }}</a
+					>
+					&nbsp;{{ user.checkpoint1_last_submission_time }}
 				</p>
 
 				{% endif %}
