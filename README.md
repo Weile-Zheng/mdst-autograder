@@ -2,9 +2,9 @@
 
 Supporting MDST recruitment.
 
-Source code for web component of the submission portal. Autograding scripts and details
-will not be disclosed.
+Source code for the submission portal. 
 
 Todo:
-Integration test cases
-Load testing 
+- [ ] Complete suite of unit tests and integration tests
+- [ ] Improve grading algorithm.
+- [ ] Improve frontend user experience.
