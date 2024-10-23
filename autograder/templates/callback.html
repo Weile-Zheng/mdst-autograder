@@ -37,14 +37,15 @@
 					refresh_token: refreshToken,
 					token_type: tokenType,
 				}),
-			})
-				.then((response) => response.json())
-				.then((data) => {
-					console.log("Success:", data);
-				})
-				.catch((error) => {
-					console.error("Error:", error);
-				});
+			}).then((response) => {
+				if (response.ok) {
+					window.location.href = "/";
+				} else {
+					document.body.innerHTML = "Error: Unable to store tokens";
+				}
+			});
+		} else {
+			document.body.innerHTML = "Error: Access token not found in URL fragment";
 		}
 	</script>
 </body>
