@@ -1,46 +1,49 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OAuth Callback</title>
-</head>
-<body>
-    <script>
-        // Parse the URL fragment to extract tokens and other information
-        const fragment = new URLSearchParams(window.location.hash.substring(1));
-        const accessToken = fragment.get('access_token');
-        const expiresAt = fragment.get('expires_at');
-        const expiresIn = fragment.get('expires_in');
-        const providerToken = fragment.get('provider_token');
-        const refreshToken = fragment.get('refresh_token');
-        const tokenType = fragment.get('token_type');
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>OAuth Callback</title>
+	</head>
+	<body>
+		<script>
+			// Parse the URL fragment to extract tokens and other information
+			const fragment = new URLSearchParams(window.location.hash.substring(1));
+			const accessToken = fragment.get("access_token");
+			const expiresAt = fragment.get("expires_at");
+			const expiresIn = fragment.get("expires_in");
+			const providerToken = fragment.get("provider_token");
+			const refreshToken = fragment.get("refresh_token");
+			const tokenType = fragment.get("token_type");
 
-        if (accessToken) {
-            // Send the tokens and other information to the server
-            fetch('/store_token', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded'
-                },
-                body: new URLSearchParams({
-                    'access_token': accessToken,
-                    'expires_at': expiresAt,
-                    'expires_in': expiresIn,
-                    'provider_token': providerToken,
-                    'refresh_token': refreshToken,
-                    'token_type': tokenType
-                })
-            }).then(response => {
-                if (response.ok) {
-                    window.location.href = '/';
-                } else {
-                    document.body.innerHTML = 'Error: Unable to store tokens';
-                }
-            });
-        } else {
-            document.body.innerHTML = 'Error: Access token not found in URL fragment';
-        }
-    </script>
-</body>
+			if (accessToken) {
+				// Determine the protocol and host dynamically
+				const protocol = window.location.protocol;
+				const host = window.location.host;
+				const storeTokenUrl = `${protocol}//${host}/store_token`;
+
+				// Send the tokens and other information to the server
+				fetch(storeTokenUrl, {
+					method: "POST",
+					headers: {
+						"Content-Type": "application/x-www-form-urlencoded",
+					},
+					body: new URLSearchParams({
+						access_token: accessToken,
+						expires_at: expiresAt,
+						expires_in: expiresIn,
+						provider_token: providerToken,
+						refresh_token: refreshToken,
+						token_type: tokenType,
+					}),
+				})
+					.then((response) => response.json())
+					.then((data) => {
+						// Redirect to home after storing the token
+						window.location.href = "/";
+					})
+					.catch((error) => console.error("Error:", error));
+			}
+		</script>
+	</body>
 </html>
