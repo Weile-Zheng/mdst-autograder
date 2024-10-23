@@ -2,6 +2,7 @@ from autograder.util import *
 from werkzeug.datastructures import FileStorage
 from io import BytesIO
 
+
 MAX_FILE_SIZE = 500 * 1024  # Multiply by 1024 for KB
 ALLOWED_FILENAMES = {"checkpoint0.ipynb", "checkpoint1.ipynb"}
 
