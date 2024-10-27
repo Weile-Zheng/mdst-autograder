@@ -115,10 +115,14 @@ def upload_checkpoint_files():
     Route for updating checkpoint files to database. Redirect to home for rerender
     """
     files = request.files.getlist('checkpoint_files')
+    upload_directory = autograder.app.config['UPLOAD_FOLDER']
+    if not os.path.exists(upload_directory):
+        os.makedirs(upload_directory)
+
     for file in files:
         if check_file_validity(file, autograder.app.config["MAX_FILE_SIZE"], autograder.app.config["ALLOWED_FILENAMES"]):
             new_filename = uniquename_from_email(session["user"]["user_email"]) + "_" + file.filename
-            file_path = os.path.join(autograder.app.config['UPLOAD_FOLDER'], new_filename) 
+            file_path = os.path.join(upload_directory, new_filename) 
             file.save(file_path)
             score = run_checkpoint_tests(file_path)
             response = upload_checkpoint_to_supabase(new_filename, file_path)

@@ -18,8 +18,9 @@
 			// Determine the protocol and host dynamically
 			const protocol = window.location.protocol;
 			const host = window.location.host;
+
 			const storeTokenUrl =
-				host === "localhost" ? `http://${host}/store_token/` : `https://${host}/store_token/`;
+				protocol === "https:" ? `https://${host}/store_token/` : `http://${host}/store_token/`;
 			console.log(protocol);
 			console.log(storeTokenUrl);
 
