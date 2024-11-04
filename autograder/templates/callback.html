@@ -2,8 +2,25 @@
 	<meta charset="UTF-8" />
 	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 	<title>OAuth Callback</title>
+	<style>
+		body {
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			height: 100vh;
+			margin: 0;
+		}
+		header {
+			font-size: 24px;
+			color: #333;
+			padding: 20px;
+			border-radius: 8px;
+		}
+	</style>
 </head>
+
 <body>
+	<header>Loading...</header>
 	<script>
 		// Parse the URL fragment to extract tokens and other information
 		const fragment = new URLSearchParams(window.location.hash.substring(1));
