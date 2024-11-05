@@ -34,9 +34,18 @@ def login_auth():
     """
     Oauth intermediate route
     """
-    callback_url = url_for('callback', _external=True) 
-    response = supabase_client.auth.sign_in_with_oauth({"provider": 'google', 
-    "options": {"redirect_to": callback_url}})
+    callback_url = url_for('callback', _external=True)
+    response = supabase_client.auth.sign_in_with_oauth({
+        "provider": 'google',
+        "options": {
+            "redirect_to": callback_url,
+            "query_params":{
+                "prompt": "select_account"
+            }
+        }
+    })
+
+    print(response.url)
     return redirect(response.url)
 
 @autograder.app.route('/callback/')
@@ -96,6 +105,7 @@ def logout():
     Clear session and log user out. 
     """
     session.clear()
+    supabase_client.auth.sign_out()
     return redirect(url_for('login'))
 
 @autograder.app.route('/submit_github_link/', methods=['POST'])
