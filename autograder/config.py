@@ -11,4 +11,4 @@ class Config:
     MAX_FILE_SIZE = 500 * 1024  # 500 KB for checkpoint files
     ALLOWED_FILENAMES = {'checkpoint0.ipynb', 'checkpoint1.ipynb'}
     TIMEZONE = 'US/Eastern'
-    CHECKPOINT_QUESTION_TAG = "# Question"
+    CHECKPOINT_QUESTION_TAG = "# @@@"
