@@ -76,7 +76,7 @@ class grader:
 
     def get_final_grade_raw(self) -> int:
         if self.total_cells_checked == 0:
-            return 0.0
+            return 0 
         return self.cells_containing_code
  
     def print_results(self) -> None:
