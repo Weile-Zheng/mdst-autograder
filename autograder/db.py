@@ -56,7 +56,7 @@ def get_github_link_db(uid:str) -> str:
 def update_checkpoint_submission_db(email: str, 
         checkpoint_file_name: str, isCheckpoint0: bool, raw_score: int, percent_score: float) -> str:
     """
-    Update the Tutorials Submission table. 
+    Update the Tutorials Submission table. Return time stamp of the tutorial submission
     """
     time_stamp = datetime.now(pytz.timezone('US/Eastern')).isoformat()
     if isCheckpoint0:
@@ -77,7 +77,7 @@ def update_checkpoint_submission_db(email: str,
 
 def get_checkpoint_submission_db(email: str) -> list[str]:
     """
-
+    Get checkpoint submission data for the user from Tutorial_Submission table
     """
     response = supabase_client.table(
         'Tutorial_Submission').select('checkpoint0_filename, checkpoint0_last_submission_time,checkpoint1_filename, checkpoint1_last_submission_time').eq('email', email).execute()

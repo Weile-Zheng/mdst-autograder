@@ -88,11 +88,11 @@ def store_token():
         uniquename = uniquename_from_email(session["user"]["user_email"])
         if checkpoint_submission["checkpoint0_filename"] is not None:
             session["user"]["checkpoint0_filename"] = checkpoint_submission["checkpoint0_filename"] 
-            session["user"]["checkpoint0_last_submission_time"] = checkpoint_submission["checkpoint0_last_submission_time"] 
+            session["user"]["checkpoint0_last_submission_time"] = to_est(checkpoint_submission["checkpoint0_last_submission_time"])
             session["user"]["checkpoint0_url"] = get_checkpoint_file_url(f"{uniquename}_checkpoint0.ipynb", "checkpoints")
         if checkpoint_submission["checkpoint1_filename"] is not None:
             session["user"]["checkpoint1_filename"] = checkpoint_submission["checkpoint1_filename"] 
-            session["user"]["checkpoint1_last_submission_time"] = checkpoint_submission["checkpoint1_last_submission_time"] 
+            session["user"]["checkpoint1_last_submission_time"] = to_est(checkpoint_submission["checkpoint1_last_submission_time"])
             session["user"]["checkpoint1_url"] = get_checkpoint_file_url(f"{uniquename}_checkpoint1.ipynb", "checkpoints")
             print(f"checkpoint1: url {session["user"]["checkpoint1_url"]}")
         return redirect(url_for('home'))
@@ -148,7 +148,7 @@ def upload_checkpoint_files():
                         score["percent_score"])
                     
                     session["user"]["checkpoint0_filename"] = new_filename
-                    session["user"]["checkpoint0_last_submission_time"] = time 
+                    session["user"]["checkpoint0_last_submission_time"] = to_est(time)
                     session["user"]["checkpoint0_url"] = get_checkpoint_file_url(new_filename, "checkpoints")
 
                 elif file.filename == "checkpoint1.ipynb":
@@ -160,7 +160,7 @@ def upload_checkpoint_files():
                             score["percent_score"])
                     
                     session["user"]["checkpoint1_filename"] = new_filename
-                    session["user"]["checkpoint1_last_submission_time"] = time
+                    session["user"]["checkpoint1_last_submission_time"] = to_est(time)
                     session["user"]["checkpoint1_url"] = get_checkpoint_file_url(new_filename, "checkpoints")
 
                 session.modified = True
