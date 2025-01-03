@@ -1,12 +1,9 @@
 import pytest
 import random
 import time
-import os
 
 from autograder import app
 from autograder.db import *
-
-os.chdir(os.path.dirname(os.path.abspath(__file__)) + '/../')
 
 @pytest.fixture
 def client():
