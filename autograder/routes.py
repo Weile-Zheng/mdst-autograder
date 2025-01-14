@@ -1,11 +1,13 @@
 #----Utils----
 import os
+import pytz
 from autograder.util import *
 from autograder.db import *
 
 #----Flask----
 from autograder import supabase_client
 from flask import redirect, url_for, request, session, render_template, flash
+from datetime import datetime
 
 @autograder.app.route('/')
 def home():
@@ -124,6 +126,11 @@ def upload_checkpoint_files():
     """
     Route for updating checkpoint files to database. Redirect to home for rerender
     """
+    current_time = datetime.now(pytz.timezone(autograder.app.config['TIMEZONE']))
+    if current_time > autograder.app.config["DEADLINE"]:
+        flash("We are no longer accepting submissions at this point. Please reach out to mdst-coms@umich.edu for any questions", "upload_error")
+        return redirect(url_for('home'))
+
     files = request.files.getlist('checkpoint_files')
     upload_directory = autograder.app.config['UPLOAD_FOLDER']
     if not os.path.exists(upload_directory):
@@ -165,9 +172,9 @@ def upload_checkpoint_files():
 
                 session.modified = True
             else:
-                flash('File upload failed when sending to database', 'error')
+                flash('Filename not valid or file size exceeds maximum limit', 'upload_error')
             os.remove(file_path)
         else: 
-            print("File not valid: Exceed size 500 KB or is not named checkpoint0.ipynb or checkpoint0.ipynb ")
-            flash('File upload failed!', 'error')
+            flash('File not valid: Exceed size 500 KB or is not named checkpoint0.ipynb or checkpoint1.ipynb ', 'upload_error')
+
     return redirect(url_for('home'))

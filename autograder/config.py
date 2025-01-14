@@ -1,5 +1,7 @@
 import os
+import pytz
 from dotenv import load_dotenv
+from datetime import datetime
 
 load_dotenv()
 
@@ -12,3 +14,4 @@ class Config:
     ALLOWED_FILENAMES = {'checkpoint0.ipynb', 'checkpoint1.ipynb'}
     TIMEZONE = 'US/Eastern'
     CHECKPOINT_QUESTION_TAG = "# @@@"
+    DEADLINE = datetime(2025, 1, 24, 23, 59, tzinfo=pytz.timezone('US/Eastern'))
