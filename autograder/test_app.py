@@ -60,9 +60,9 @@ def test_upload_github_link(client):
     assert polling_update(get_github_link_db, mock_user['id'], link) == True
 
 def test_upload_valid_checkpoint_files(client):
-    pass
-
-def test_upload_invalid_checkpoint_files(client):
+    pass 
+    
+def test_upload_invalid_checkpoint_files(client): 
     pass
 
 def test_upload_edgecase(client):

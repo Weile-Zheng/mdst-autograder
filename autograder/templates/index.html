@@ -96,6 +96,10 @@
 					Please upload "checkpoint0.ipynb" and "checkpoint1.ipynb". All files with other name will
 					be automatically discarded. Only the most recent submission will be saved.
 				</p>
+				{% with messages = get_flashed_messages(with_categories=true,
+				category_filter=["upload_error"]) %} {% if messages %} {% for _, m in messages %}
+				<p>{{ m }}</p>
+				{% endfor %} {% endif %} {% endwith %}
 				<form
 					id="uploadForm"
 					action="{{ url_for('upload_checkpoint_files') }}"

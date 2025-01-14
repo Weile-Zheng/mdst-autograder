@@ -101,4 +101,6 @@ def get_checkpoint_file_url(filename: str, bucketname: str) -> str:
     """
     # 60 days in seconds
     expiration_time = 60 * 24 * 60 * 60
-    return supabase_client.storage.from_('checkpoints').create_signed_url(filename, expiration_time)['signedURL']
+    signed_url = supabase_client.storage.from_(bucketname).create_signed_url(filename, expiration_time)['signedURL']
+    return f"{signed_url}&download={filename}"
+    
