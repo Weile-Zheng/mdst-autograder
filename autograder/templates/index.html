@@ -49,6 +49,10 @@
 			.file-list button {
 				margin-left: 10px;
 			}
+
+			.upload-error {
+				color: red;
+			}
 		</style>
 	</head>
 	<body>
@@ -98,7 +102,7 @@
 				</p>
 				{% with messages = get_flashed_messages(with_categories=true,
 				category_filter=["upload_error"]) %} {% if messages %} {% for _, m in messages %}
-				<p>{{ m }}</p>
+				<p class="upload-error">{{ m }}</p>
 				{% endfor %} {% endif %} {% endwith %}
 				<form
 					id="uploadForm"
