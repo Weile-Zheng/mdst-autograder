@@ -21,9 +21,10 @@ def test_check_file_validity():
 
     # File size invalid and name invalid -> invalid
     file = FileStorage(stream=BytesIO(b"dummy content"), filename="checkpoint0.txt", content_length=1000*1024)
-    assert check_file_validity(file, MAX_FILE_SIZE, allowedFileNames=ALLOWED_FILENAMES) == False 
+    assert check_file_validity(file, MAX_FILE_SIZE, allowedFileNames=ALLOWED_FILENAMES) == False
 
-def test_uniquename_from_email():
+
+def test_uniquename_from_email() -> None:
     assert uniquename_from_email("weilez@umich.edu") == "weilez"
     assert uniquename_from_email("bigpanda@example.com") == "bigpanda"
     assert uniquename_from_email("amiralid@domain.com") == "amiralid"

@@ -1,7 +1,7 @@
 from typing import List, Tuple, Optional
 import nbformat
 
-class grader:
+class Grader:
      
     def __init__(self, notebook_file_path: str, question_start_with: str):
         """
@@ -46,7 +46,7 @@ class grader:
             if cell.cell_type == 'code' and cell.source.strip().startswith(self.question_start_with)
         ]
 
-    def check_cells_have_code(self) -> List[Tuple[nbformat.NotebookNode, bool]]:
+    def check_cells_have_code(self):
         """
         Check if cells with comments starting with 'Question' contain code.
 
@@ -110,7 +110,7 @@ if __name__ == "__main__":
     notebook_path = 'checkpoint0.ipynb'
     question_start_with = "# Question"
     
-    grader_instance = grader(notebook_path, question_start_with)
+    grader_instance = Grader(notebook_path, question_start_with)
     grader_instance.check_cells_have_code()
     grader_instance.print_results()
     grader_instance.print_grade()

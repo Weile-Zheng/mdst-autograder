@@ -3,7 +3,7 @@ import autograder
 import pytz
 from datetime import datetime
 from typing import Dict
-from autograder.grader import grader
+from autograder.grader import Grader
 from werkzeug.datastructures import FileStorage
 
 def check_file_validity (file: FileStorage, maxFileSize: int, allowedFileNames: set) -> bool:
@@ -42,7 +42,7 @@ def run_checkpoint_tests(filepath: str) -> Dict[str, int]:
 
     Returns a dict on computed "raw_score" and "percent_score"
     """
-    grader_instance = grader(filepath, autograder.app.config["CHECKPOINT_QUESTION_TAG"])
+    grader_instance = Grader(filepath, autograder.app.config["CHECKPOINT_QUESTION_TAG"])
     grader_instance.check_cells_have_code()
     grader_instance.print_results()
     grader_instance.print_grade()
