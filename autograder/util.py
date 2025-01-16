@@ -25,7 +25,7 @@ def to_est(iso_timestamp: str) -> str:
     human_readable_time = est_time.strftime('%Y-%m-%d %H:%M:%S')
     return human_readable_time
 
-def uniquename_from_email(email: str) -> bool:
+def uniquename_from_email(email: str) -> str:
     """
     Strips the unique name from an email address given an email.
 
@@ -37,7 +37,7 @@ def run_checkpoint_tests(filepath: str) -> Dict[str, int]:
     """
     Run checkpoint completion, compilation, correctness (if applicable) tests on the file
 
-    Note this function expects a valid input and does not do additial checkings 
+    Note this function expects a valid input and does not do additional checks
     on the file type, size etc. 
 
     Returns a dict on computed "raw_score" and "percent_score"

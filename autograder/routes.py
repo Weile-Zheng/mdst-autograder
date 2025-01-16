@@ -67,7 +67,7 @@ def callback():
 @autograder.app.route('/store_token/', methods=['POST'])
 def store_token():
     """
-    Store authentication token and create/retrive User session data. 
+    Store authentication token and create/retrieve User session data.
     """
     access_token = request.form.get('access_token')
 
@@ -113,7 +113,7 @@ def logout():
 @autograder.app.route('/submit_github_link/', methods=['POST'])
 def submit_github_link():
     """
-    Route for updating github link to database. Redirect to home for rerender. 
+    Route for updating GitHub link to database. Redirect to home for rerender.
     """
     github_link = request.form.get('github_link')
     update_github_link_db(session["user"]["id"], github_link)
