@@ -4,6 +4,7 @@
 /myenv
 .DS_Store
 /jupyter
+.idea/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

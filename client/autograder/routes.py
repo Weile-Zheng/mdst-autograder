@@ -1,8 +1,11 @@
 #----Utils----
 import os
 import pytz
+import asyncio
+
 from autograder.util import *
 from autograder.db import *
+from autograder.mq import *
 
 #----Flask----
 from autograder import supabase_client
@@ -145,7 +148,6 @@ def upload_checkpoint_files():
             response = upload_checkpoint_to_supabase(new_filename, file_path)
             if response.status_code == 200: 
                 flash('Files uploaded successfully!', 'success')
-
                 if file.filename == "checkpoint0.ipynb":
                     time = update_checkpoint_submission_db(
                         session["user"]["user_email"], 

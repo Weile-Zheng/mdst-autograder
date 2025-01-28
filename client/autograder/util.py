@@ -46,5 +46,6 @@ def run_checkpoint_tests(filepath: str) -> Dict[str, int]:
     grader_instance.check_cells_have_code()
     grader_instance.print_results()
     grader_instance.print_grade()
+    
     return {"raw_score": grader_instance.get_final_grade_raw(), 
             "percent_score": grader_instance.get_final_grade_percentage()}
