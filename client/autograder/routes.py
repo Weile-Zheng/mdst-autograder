@@ -8,7 +8,7 @@ from autograder.db import *
 from autograder.mq import *
 
 #----Flask----
-from autograder import supabase_client
+from autograder import supabase_client, queue_sender
 from flask import redirect, url_for, request, session, render_template, flash
 from datetime import datetime
 
@@ -125,7 +125,7 @@ def submit_github_link():
     return redirect(url_for('home'))
 
 @autograder.app.route('/upload_checkpoint_files/', methods=['POST'])
-def upload_checkpoint_files():
+async def upload_checkpoint_files():
     """
     Route for updating checkpoint files to database. Redirect to home for rerender
     """
@@ -159,6 +159,7 @@ def upload_checkpoint_files():
                     session["user"]["checkpoint0_filename"] = new_filename
                     session["user"]["checkpoint0_last_submission_time"] = to_est(time)
                     session["user"]["checkpoint0_url"] = get_checkpoint_file_url(new_filename, "checkpoints")
+                    await queue_sender.send_messages([GradingJob(session["user"]["user_email"], 0, session["user"]["checkpoint0_url"])])
 
                 elif file.filename == "checkpoint1.ipynb":
                     time = update_checkpoint_submission_db(
@@ -171,6 +172,7 @@ def upload_checkpoint_files():
                     session["user"]["checkpoint1_filename"] = new_filename
                     session["user"]["checkpoint1_last_submission_time"] = to_est(time)
                     session["user"]["checkpoint1_url"] = get_checkpoint_file_url(new_filename, "checkpoints")
+                    await queue_sender.send([GradingJob(session["user"]["user_email"], 1, session["user"]["checkpoint0_url"])])
 
                 session.modified = True
             else:

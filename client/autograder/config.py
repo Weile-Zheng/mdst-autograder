@@ -18,4 +18,4 @@ class Config:
     MQ_NAME = os.getenv('SERVICEBUS_QUEUE_NAME') # Azure Service Bus queue name
     
     CHECKPOINT_QUESTION_TAG = "# @@@"
-    DEADLINE = datetime(2025, 1, 24, 23, 59, tzinfo=pytz.timezone('US/Eastern'))
+    DEADLINE = datetime(2026, 1, 24, 23, 59, tzinfo=pytz.timezone('US/Eastern'))

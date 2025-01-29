@@ -3,7 +3,7 @@ import json
 from azure.servicebus.aio import ServiceBusClient
 from azure.servicebus import ServiceBusMessage
 
-class NewGradingJob: 
+class GradingJob: 
     def __init__(self, email: str, checkpoint: int, url: str):
         self.email = email
         self.checkpoint = checkpoint
@@ -21,7 +21,10 @@ class MQ:
         self.conn_str = conn_str
         self.queue_name = queue_name
     
-    async def send_messages(self, grading_jobs: list[NewGradingJob]) -> None:
+    def send(self, grading_job: GradingJob) -> None:
+        asyncio.run(self.send_messages([grading_job]))
+
+    async def send_messages(self, grading_jobs: list[GradingJob]) -> None:
         async with ServiceBusClient.from_connection_string(
         conn_str=self.conn_str,
         logging_enable=True) as servicebus_client:
@@ -40,8 +43,8 @@ async def main():
     mq = MQ(conn_str, queue_name)
     
     jobs = [
-        NewGradingJob("user1@example.com", 1, "http://example.com/1"),
-        NewGradingJob("user2@example.com", 2, "http://example.com/2"),
+        GradingJob("user1@example.com", 1, "http://example.com/1"),
+        GradingJob("user2@example.com", 2, "http://example.com/2"),
     ]
     
     await mq.send_messages(jobs)
