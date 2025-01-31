@@ -54,7 +54,7 @@ def get_github_link_db(uid:str) -> str:
         return response.data[0]['github_link']
 
 def update_checkpoint_submission_db(email: str, 
-        checkpoint_file_name: str, isCheckpoint0: bool, raw_score: int, percent_score: float) -> str:
+        checkpoint_file_name: str, isCheckpoint0: bool) -> str:
     """
     Update the Tutorials Submission table. Return time stamp of the tutorial submission
     """
@@ -63,15 +63,11 @@ def update_checkpoint_submission_db(email: str,
         supabase_client.table('Tutorial_Submission').update({
              'checkpoint0_filename': checkpoint_file_name,
              'checkpoint0_last_submission_time': time_stamp,
-             'checkpoint0_raw': raw_score,
-             'checkpoint0_percent':percent_score
             }).eq('email', email).execute()
     else:
         supabase_client.table('Tutorial_Submission').update({
             'checkpoint1_filename': checkpoint_file_name, 
             'checkpoint1_last_submission_time': time_stamp,
-            'checkpoint1_raw': raw_score,
-            'checkpoint1_percent': percent_score
             }).eq('email', email).execute()
     return time_stamp
 

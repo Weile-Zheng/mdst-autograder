@@ -1,7 +1,6 @@
 #----Utils----
 import os
 import pytz
-import asyncio
 
 from autograder.util import *
 from autograder.db import *
@@ -144,7 +143,6 @@ async def upload_checkpoint_files():
             new_filename = uniquename_from_email(session["user"]["user_email"]) + "_" + file.filename
             file_path = os.path.join(upload_directory, new_filename) 
             file.save(file_path)
-            score = run_checkpoint_tests(file_path)
             response = upload_checkpoint_to_supabase(new_filename, file_path)
             if response.status_code == 200: 
                 flash('Files uploaded successfully!', 'success')
@@ -152,27 +150,23 @@ async def upload_checkpoint_files():
                     time = update_checkpoint_submission_db(
                         session["user"]["user_email"], 
                         new_filename, 
-                        1,
-                        score["raw_score"],
-                        score["percent_score"])
+                        True)
                     
                     session["user"]["checkpoint0_filename"] = new_filename
                     session["user"]["checkpoint0_last_submission_time"] = to_est(time)
                     session["user"]["checkpoint0_url"] = get_checkpoint_file_url(new_filename, "checkpoints")
-                    await queue_sender.send_messages([GradingJob(session["user"]["user_email"], 0, session["user"]["checkpoint0_url"])])
+                    await queue_sender.start_sending([GradingJob(session["user"]["user_email"], 0, session["user"]["checkpoint0_url"])])
 
                 elif file.filename == "checkpoint1.ipynb":
                     time = update_checkpoint_submission_db(
                             session["user"]["user_email"], 
                             new_filename, 
-                            0,
-                            score["raw_score"],
-                            score["percent_score"])
+                            False)
                     
                     session["user"]["checkpoint1_filename"] = new_filename
                     session["user"]["checkpoint1_last_submission_time"] = to_est(time)
                     session["user"]["checkpoint1_url"] = get_checkpoint_file_url(new_filename, "checkpoints")
-                    await queue_sender.send([GradingJob(session["user"]["user_email"], 1, session["user"]["checkpoint0_url"])])
+                    await queue_sender.start_sending([GradingJob(session["user"]["user_email"], 1, session["user"]["checkpoint1_url"])])
 
                 session.modified = True
             else:

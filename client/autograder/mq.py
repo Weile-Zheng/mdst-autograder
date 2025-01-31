@@ -20,11 +20,8 @@ class MQ:
     def __init__(self, conn_str: str, queue_name: str):
         self.conn_str = conn_str
         self.queue_name = queue_name
-    
-    def send(self, grading_job: GradingJob) -> None:
-        asyncio.run(self.send_messages([grading_job]))
 
-    async def send_messages(self, grading_jobs: list[GradingJob]) -> None:
+    async def start_sending(self, grading_jobs: list[GradingJob]) -> None:
         async with ServiceBusClient.from_connection_string(
         conn_str=self.conn_str,
         logging_enable=True) as servicebus_client:
