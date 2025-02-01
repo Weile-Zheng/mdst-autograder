@@ -8,9 +8,11 @@ azure-functions==1.21.3
 certifi==2024.12.14
 charset-normalizer==3.4.1
 deprecation==2.1.0
+distro==1.9.0
 fastjsonschema==2.21.1
 frozenlist==1.5.0
 gotrue==2.11.3
+groq==0.16.0
 h11==0.14.0
 h2==4.1.0
 hpack==4.1.0

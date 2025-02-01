@@ -1,11 +1,12 @@
 import nbformat
 from pathlib import Path
-from config import Config
+from config import Config, Mode
 from typing import List, Dict, Optional
+
 
 class Grader:
      
-    def __init__(self, notebook_file_path: str, question_start_with: str):
+    def __init__(self, notebook_file_path: str, question_start_with: str, mode: Mode):
         """
         Constructor method to initialize instance attributes.
 
@@ -16,24 +17,26 @@ class Grader:
         self.notebook_file_path = notebook_file_path
         self.question_start_with = question_start_with
         self.notebook: Optional[nbformat.NotebookNode] = None
+        self.mode = mode
 
-        self.load_notebook()
-        self.cells_to_check: List[int] = self.find_cells_to_check()
+        self.__load_notebook()
+        self.cells_to_check: List[int] = self.__find_cells_to_check()
 
         self.cells_containing_code: int = 0
         self.total_cells_checked: int = 0
         self.final_score: int  = 0
-        self.result = []
+        self.answers = []
 
 
-    def load_notebook(self) -> None:
+
+    def __load_notebook(self) -> None:
         """
         Load the notebook from the specified file path.
         """
         with open(self.notebook_file_path, 'r', encoding='utf-8') as f:
             self.notebook = nbformat.read(f, as_version=4)
 
-    def find_cells_to_check(self) -> List[int]:
+    def __find_cells_to_check(self) -> List[int]:
         """
         Find all cell indices that start with the specified string and return them as a list.
 
@@ -48,7 +51,8 @@ class Grader:
             if cell.cell_type == 'code' and cell.source.strip().startswith(self.question_start_with)
         ]
 
-    def check_cells_have_code(self):
+
+    def __check_cells_have_code(self):
         """
         Check if cells with comments starting with 'Question' contain code.
 
@@ -64,12 +68,18 @@ class Grader:
         for idx in self.cells_to_check:
             cell = self.notebook.cells[idx]
             lines = cell.source.split('\n')
-            code_lines = [line for line in lines if not line.strip().startswith('#')]
+            code_lines = [line for line in lines if not line.strip().startswith('#') and not line.strip() == '']
             has_code = any(code_lines)
             if has_code:
                 self.cells_containing_code += 1
-            results.append((cell, has_code))
-        self.result = results
+            results.append((cell, code_lines))
+        self.answers = results
+    
+    def __grade_with_ai(self):
+        """
+        Grade the checkpoint using AI.
+        """
+        pass
 
     def get_final_grade_percentage(self) -> float: 
         if self.total_cells_checked == 0:
@@ -81,17 +91,38 @@ class Grader:
             return 0 
         return self.cells_containing_code
 
-    def print_results(self) -> None:
+    def grade_checkpoint(self) -> None:
+        """
+        Grade the checkpoint based on the number of cells containing code.
+        """
+        print(f"Grading in {self.mode} mode.")
+        self.__check_cells_have_code()
+
+        if self.mode == Mode.COMPLETION:
+            pass
+        elif self.mode == Mode.RUNNABLE:
+            pass
+        elif self.mode == Mode.CORRECTNESS:
+            self.final_score = self.__grade_with_ai()
+
+    def print_question_and_answer(self) -> None:
         """
         Print the results of checking if cells contain code. 
         This function is primarily used for debugging. 
         """
-        if self.total_cells_checked == 0:
-            print("No cells checked.")
+        if self.cells_containing_code == 0:
+            print("No cells contain code.")
             return
-        for cell, has_code in self.result:
+        
+        for cell, has_code in self.answers:
             first_line = cell.source.splitlines()[0] if cell.source.splitlines() else ""
             print(f"Cell with comment '{first_line}' has code: {has_code}")
+    
+    def get_question_and_answer(self) -> List[Dict[str, str]]:
+        """
+        Return the results of checking if cells contain code. 
+        """
+        return [{"question": question.source.splitlines()[0], "answer": answer} for question, answer in self.answers]
     
     def print_grade(self) -> None:
         """
@@ -126,9 +157,9 @@ def run_checkpoint_tests(filepath: str) -> Dict[str, int | float]:
     if not path.exists():
         raise FileNotFoundError(f"The file {path} does not exist.")
     
-    grader_instance = Grader(filepath, Config.CHECKPOINT_QUESTION_TAG)
-    grader_instance.check_cells_have_code()
-    grader_instance.print_results()
+    grader_instance = Grader(filepath, Config.CHECKPOINT_QUESTION_TAG, Config.GRADER_MODE)
+    grader_instance.grade_checkpoint()
+    grader_instance.print_question_and_answer()
     grader_instance.print_grade()
     
     return {"raw_score": grader_instance.get_final_grade_raw(), 
