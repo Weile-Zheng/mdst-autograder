@@ -8,4 +8,4 @@ MDST Onboarding: https://github.com/MichiganDataScienceTeam/MDST-Onboarding.
 
 The portal is currently closed, please see [here](https://mdst.club/) for our next recruitment cycle
 
-![](./design.png)
+![](./assets/design.png)
