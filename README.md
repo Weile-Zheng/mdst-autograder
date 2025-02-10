@@ -2,10 +2,10 @@
 
 Supporting MDST recruitment.
 
-Source code for the submission portal. 
+Source code for the submission portal.
 
-MDST Onboarding: https://github.com/MichiganDataScienceTeam/MDST-Onboarding. 
+MDST Onboarding: https://github.com/MichiganDataScienceTeam/MDST-Onboarding.
 
-The portal is currently closed, please see [here](https://mdst.club/) for our next recruitment cycle
+The portal is currently closed, please see our [website](https://mdst.club/) for our next recruitment cycle
 
 ![](./assets/design.png)
