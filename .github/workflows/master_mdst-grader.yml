@@ -8,6 +8,9 @@ on:
     push:
         branches:
             - master
+        paths:
+            - "grader/**"
+            - ".github/workflows/master_mdst-grader.yml"
     workflow_dispatch:
 
 env:
@@ -40,7 +43,7 @@ jobs:
             # Optional: Add step to run tests here
 
             - name: Zip artifact for deployment
-              run: zip -r release.zip grader/
+              run: cd grader && zip -r ../release.zip . # Do not include grader/, we need function app at root
 
             - name: Upload artifact for deployment job
               uses: actions/upload-artifact@v4

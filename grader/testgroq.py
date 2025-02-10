@@ -31,7 +31,7 @@ def check_answer_with_groq(question_answer) -> None:
 
                     Example Output: ["Question 1: Correct", "Question 2: No Answer Provided"]
                     
-                    You must strictly follow the format I provided. Do not give any more additional lines, blank or nonblank.
+                    You must strictly follow the format I provided. DO NOT give any more additional lines, blank or nonblank.
                 """
             },
             {

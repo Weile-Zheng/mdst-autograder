@@ -1,5 +1,6 @@
 import logging
 import os
+import random
 import azure.functions as func
 from grader import run_checkpoint_tests
 from testgroq import run_check
@@ -21,7 +22,8 @@ def process_grading_job(msg: func.ServiceBusMessage):
     
     msg_obj = Message.from_json(msg.get_body().decode('utf-8'))
     email, checkpoint, url = msg_obj.email, msg_obj.checkpoint, msg_obj.url
-    temp_file = f"checkpoint{checkpoint}.ipynb"
+    unique_id = str(random.randint(1000, 9999))
+    temp_file = f"checkpoint{checkpoint}_{email}_{unique_id}.ipynb"
 
     logging.info("Downloading checkpoint file from URL.")
     download_checkpoint(url, name=temp_file)
