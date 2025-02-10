@@ -1,11 +1,13 @@
 #----Utils----
 import os
 import pytz
+
 from autograder.util import *
 from autograder.db import *
+from autograder.mq import *
 
 #----Flask----
-from autograder import supabase_client
+from autograder import supabase_client, queue_sender
 from flask import redirect, url_for, request, session, render_template, flash
 from datetime import datetime
 
@@ -67,7 +69,7 @@ def callback():
 @autograder.app.route('/store_token/', methods=['POST'])
 def store_token():
     """
-    Store authentication token and create/retrive User session data. 
+    Store authentication token and create/retrieve User session data.
     """
     access_token = request.form.get('access_token')
 
@@ -113,7 +115,7 @@ def logout():
 @autograder.app.route('/submit_github_link/', methods=['POST'])
 def submit_github_link():
     """
-    Route for updating github link to database. Redirect to home for rerender. 
+    Route for updating GitHub link to database. Redirect to home for rerender.
     """
     github_link = request.form.get('github_link')
     update_github_link_db(session["user"]["id"], github_link)
@@ -122,7 +124,7 @@ def submit_github_link():
     return redirect(url_for('home'))
 
 @autograder.app.route('/upload_checkpoint_files/', methods=['POST'])
-def upload_checkpoint_files():
+async def upload_checkpoint_files():
     """
     Route for updating checkpoint files to database. Redirect to home for rerender
     """
@@ -141,34 +143,30 @@ def upload_checkpoint_files():
             new_filename = uniquename_from_email(session["user"]["user_email"]) + "_" + file.filename
             file_path = os.path.join(upload_directory, new_filename) 
             file.save(file_path)
-            score = run_checkpoint_tests(file_path)
             response = upload_checkpoint_to_supabase(new_filename, file_path)
             if response.status_code == 200: 
                 flash('Files uploaded successfully!', 'success')
-
                 if file.filename == "checkpoint0.ipynb":
                     time = update_checkpoint_submission_db(
                         session["user"]["user_email"], 
                         new_filename, 
-                        1,
-                        score["raw_score"],
-                        score["percent_score"])
+                        True)
                     
                     session["user"]["checkpoint0_filename"] = new_filename
                     session["user"]["checkpoint0_last_submission_time"] = to_est(time)
                     session["user"]["checkpoint0_url"] = get_checkpoint_file_url(new_filename, "checkpoints")
+                    await queue_sender.start_sending([GradingJob(session["user"]["user_email"], 0, session["user"]["checkpoint0_url"])])
 
                 elif file.filename == "checkpoint1.ipynb":
                     time = update_checkpoint_submission_db(
                             session["user"]["user_email"], 
                             new_filename, 
-                            0,
-                            score["raw_score"],
-                            score["percent_score"])
+                            False)
                     
                     session["user"]["checkpoint1_filename"] = new_filename
                     session["user"]["checkpoint1_last_submission_time"] = to_est(time)
                     session["user"]["checkpoint1_url"] = get_checkpoint_file_url(new_filename, "checkpoints")
+                    await queue_sender.start_sending([GradingJob(session["user"]["user_email"], 1, session["user"]["checkpoint1_url"])])
 
                 session.modified = True
             else:

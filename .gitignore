@@ -1,9 +1,14 @@
 
 /env
+server-env/
 .env
 /myenv
 .DS_Store
 /jupyter
+.idea/
+.vscode
+
+local.settings.json
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
