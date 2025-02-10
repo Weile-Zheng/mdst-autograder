@@ -84,12 +84,12 @@ class Grader:
     def get_final_grade_percentage(self) -> float: 
         if self.total_cells_checked == 0:
             return 0.0
-        return round((self.cells_containing_code / self.total_cells_checked) * 100, 2)    
+        return round((self.final_score / self.total_cells_checked) * 100, 2)    
 
     def get_final_grade_raw(self) -> int:
         if self.total_cells_checked == 0:
             return 0 
-        return self.cells_containing_code
+        return self.final_score
 
     def grade_checkpoint(self) -> None:
         """
@@ -124,6 +124,17 @@ class Grader:
         """
         return [{"question": question.source.splitlines()[0], "answer": answer} for question, answer in self.answers]
     
+    def process_result(self, result: List[str])-> None:
+        """
+        Process the result of the grading.
+
+        A sample: "["Question 1: Correct", "Question 2: No Answer Provided", "Question 3: Correct", "Question 4: No Answer Provided", "Question 5: No Answer Provided", "Question 6: No Answer Provided", "Question 7: Incorrect", "Question 8: No Answer Provided", "Question 9: No Answer Provided", "Question 10: No Answer Provided", "Question 11: No Answer Provided", "Question 12: No Answer Provided", "Question 13: No Answer Provided", "Question 14: No Answer Provided"]["Question 1: Correct", "Question 2: No Answer Provided", "Question 3: Correct", "Question 4: No Answer Provided", "Question 5: No Answer Provided", "Question 6: No Answer Provided", "Question 7: Incorrect", "Question 8: No Answer Provided", "Question 9: No Answer Provided", "Question 10: No Answer Provided", "Question 11: No Answer Provided", "Question 12: No Answer Provided", "Question 13: No Answer Provided", "Question 14: No Answer Provided"]"
+        """
+        result_list = [item.strip() for item in result.split(',')]
+        for r in result_list:
+            if "Correct" in r or "Almost Correct" in r:
+                self.final_score += 1
+    
     def print_grade(self) -> None:
         """
         Print the grade base on the number of cells containing code divided by the total cells checked.
@@ -133,11 +144,10 @@ class Grader:
             print("No cells checked.")
             return
         print("\nPrinting completion grade ------------------")
-        grade = (self.cells_containing_code / self.total_cells_checked) * 100
+        grade = (self.final_score / self.total_cells_checked) * 100
         print(f"\nTotal cells checked (Questions): {self.total_cells_checked}")
-        print(f"Cells containing code (Answers): {self.cells_containing_code}")
+        print(f"Cells Correct (Answers): {self.final_score}")
         print(f"Grade: {grade:.2f}%")
-
 
 def run_checkpoint_tests(filepath: str) -> Dict[str, int | float]:
     """

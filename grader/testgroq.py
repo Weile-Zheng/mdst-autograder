@@ -31,7 +31,7 @@ def check_answer_with_groq(question_answer) -> None:
 
                     Example Output: ["Question 1: Correct", "Question 2: No Answer Provided"]
                     
-                    You must strictly follow the format I provided
+                    You must strictly follow the format I provided. Do not give any more additional lines, blank or nonblank.
                 """
             },
             {
@@ -43,17 +43,18 @@ def check_answer_with_groq(question_answer) -> None:
     )
 
     print(chat_completion.choices[0].message.content)
+    return chat_completion.choices[0].message.content
 
 
-def run_check():
-    grader = Grader("weilez.ipynb", "# @@@", Mode.COMPLETION)
+def run_check(notebook_path: str, question_tag: str, mode: Mode) -> None:
+    grader = Grader(notebook_path, question_tag, mode)
     grader.grade_checkpoint()
     answer = str(grader.get_question_and_answer())
     print(answer)
-    print(type(answer))
-
     print("Checking answer with GROQ...")
-    check_answer_with_groq(answer)
+    result = check_answer_with_groq(answer)
+    grader.process_result(result)
+    return grader.get_final_grade_raw(), grader.get_final_grade_percentage()
 
 if __name__ == "__main__":
     run_check()

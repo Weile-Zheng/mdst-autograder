@@ -1,4 +1,4 @@
-#!/Users/weilezheng/CompSci/mdst/autograder/mdst-autograder/client/myenv/bin/python3.12
+#!/Users/weilezheng/CompSci/mdst/mdst-autograder/client/venv/bin/python3.12
 # -*- coding: utf-8 -*-
 import re
 import sys

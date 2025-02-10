@@ -2,8 +2,10 @@ import logging
 import os
 import azure.functions as func
 from grader import run_checkpoint_tests
+from testgroq import run_check
 from db import upload_score
 from util import download_checkpoint, Message
+from config import Config
 
 app = func.FunctionApp()
 
@@ -25,8 +27,7 @@ def process_grading_job(msg: func.ServiceBusMessage):
     download_checkpoint(url, name=temp_file)
 
     logging.info("Running checkpoint tests.")
-    result = run_checkpoint_tests(temp_file)
-    raw_score, percent_score = result["raw_score"], result["percent_score"]
+    raw_score, percent_score = run_check(temp_file, Config.CHECKPOINT_QUESTION_TAG, Config.GRADER_MODE)
 
     logging.info("Uploading score to database.")
     success = upload_score(email, checkpoint, raw_score, percent_score)
