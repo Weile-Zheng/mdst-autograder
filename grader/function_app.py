@@ -11,7 +11,7 @@ app = func.FunctionApp()
 
 @app.service_bus_queue_trigger(arg_name="msg", 
                             queue_name="grade-queue", 
-                            connection="CONNECTION_STRING")
+                            connection="mdstsubmission_SERVICEBUS")
 
 def process_grading_job(msg: func.ServiceBusMessage):
     logging.info('New grading job received from message queue.')
