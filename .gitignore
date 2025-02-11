@@ -6,7 +6,7 @@ server-env/
 .DS_Store
 /jupyter
 .idea/
-.vscode
+.vscode/
 venv
 
 local.settings.json

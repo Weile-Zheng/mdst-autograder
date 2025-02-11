@@ -2,16 +2,12 @@ import logging
 import os
 import random
 import azure.functions as func
-from grader import run_checkpoint_tests
 from testgroq import run_check
 from db import upload_score
 from util import download_checkpoint, Message
 from config import Config
 
 app = func.FunctionApp()
-
-
-@app.function_name(name="ServiceBusQueueTrigger1")
 
 @app.service_bus_queue_trigger(arg_name="msg", 
                             queue_name="grade-queue", 
