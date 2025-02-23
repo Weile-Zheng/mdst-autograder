@@ -1,9 +1,9 @@
 import os
-import json
 from dotenv import load_dotenv
 from groq import Groq
 from grader import Grader
 from config import Mode
+from config import Config
 load_dotenv()
 
 def check_answer_with_groq(question_answer) -> None:
@@ -48,13 +48,15 @@ def check_answer_with_groq(question_answer) -> None:
 
 def run_check(notebook_path: str, question_tag: str, mode: Mode) -> None:
     grader = Grader(notebook_path, question_tag, mode)
-    grader.grade_checkpoint()
+    grader.check_cells_have_code()
     answer = str(grader.get_question_and_answer())
     print(answer)
     print("Checking answer with GROQ...")
     result = check_answer_with_groq(answer)
+
     grader.process_result(result)
     return grader.get_final_grade_raw(), grader.get_final_grade_percentage()
 
 if __name__ == "__main__":
-    run_check()
+    raw_score, percent_score = run_check("weilez.ipynb", Config.CHECKPOINT_QUESTION_TAG , Mode.CORRECTNESS)
+    print(raw_score, percent_score)

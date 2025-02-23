@@ -15,4 +15,4 @@ class Config:
     SUPABASE_KEY = os.getenv("SUPABASE_KEY")
     GROQ_API_KEY = os.getenv("GROQ_API_KEY")
     
-    GRADER_MODE = Mode.COMPLETION
+    GRADER_MODE = Mode.CORRECTNESS

@@ -24,7 +24,7 @@ class Grader:
 
         self.cells_containing_code: int = 0
         self.total_cells_checked: int = 0
-        self.final_score: int  = 0
+        self.final_score: int = 0
         self.answers = []
 
 
@@ -52,7 +52,7 @@ class Grader:
         ]
 
 
-    def __check_cells_have_code(self):
+    def check_cells_have_code(self):
         """
         Check if cells with comments starting with 'Question' contain code.
 
@@ -74,12 +74,6 @@ class Grader:
                 self.cells_containing_code += 1
             results.append((cell, code_lines))
         self.answers = results
-    
-    def __grade_with_ai(self):
-        """
-        Grade the checkpoint using AI.
-        """
-        pass
 
     def get_final_grade_percentage(self) -> float: 
         if self.total_cells_checked == 0:
@@ -90,20 +84,6 @@ class Grader:
         if self.total_cells_checked == 0:
             return 0 
         return self.final_score
-
-    def grade_checkpoint(self) -> None:
-        """
-        Grade the checkpoint based on the number of cells containing code.
-        """
-        print(f"Grading in {self.mode} mode.")
-        self.__check_cells_have_code()
-
-        if self.mode == Mode.COMPLETION:
-            pass
-        elif self.mode == Mode.RUNNABLE:
-            pass
-        elif self.mode == Mode.CORRECTNESS:
-            self.final_score = self.__grade_with_ai()
 
     def print_question_and_answer(self) -> None:
         """
